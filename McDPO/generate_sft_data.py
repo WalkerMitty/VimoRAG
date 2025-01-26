@@ -5,7 +5,7 @@ import numpy as np
 PROMPT = 'Generate a sequence of motion tokens matching the following human motion description. You can use the video as a reference. Video information: <video>\n Motion description: {}'
 
 
-raw_text_path = 'MotionGPT/dataset/KIT-ML/texts'
+raw_text_path = 'MotionGPT/dataset/t2m/texts'
 motiongpt_path = 'generation/MotionGPT/data'
 sft_data = 'dataset/sft_data'
 
@@ -29,7 +29,7 @@ def read_text(text_path):
     return captions
 def generation(split):
 
-    motion_split_path = os.path.join(motiongpt_path,split+'_KIT-ML.json') 
+    motion_split_path = os.path.join(motiongpt_path,split+'_t2m.json') 
     with open(motion_split_path,'r') as f:
         motion_split_data = json.load(f)
     with open(retrieval_top1,'r') as f:
@@ -59,7 +59,7 @@ def generation(split):
                     continue
                 input_set.add(input)
                 temp_dict = {}
-                temp_dict['source'] = 'KIT-ML'
+                temp_dict['source'] = 't2m'
                 temp_dict['type'] = 'conv'
                 temp_dict['id'] = id
                 # temp_dict['video'] = id+'.mp4' #ground truth in t2m video format

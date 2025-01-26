@@ -28,9 +28,9 @@ args = option.get_args_parser()
 
 def main() -> None:
 
-    random.seed(args.seed) 
-    torch.manual_seed(args.seed)  
-    torch.cuda.manual_seed(args.seed) 
+    # random.seed(args.seed) 
+    # torch.manual_seed(args.seed)  
+    # torch.cuda.manual_seed(args.seed) 
 
     # os.makedirs(args.out_dir, exist_ok = True)
 
