@@ -1,0 +1,27 @@
+torchrun --nproc_per_node=8 --master_port 12323 --nnodes=1 main_task_retrieval.py \
+    --do_train \
+    --num_thread_reader=4 \
+    --epochs=5\
+    --batch_size=128 \
+    --n_display=15 \
+    --train_csv="/dataset/retrieval_data/mergev1_motionbert_remain.json" \
+    --val_csv="/dataset/retrieval_data/mergev1_2k.json" \
+    --max_words=77 \
+    --max_frames=16 \
+    --batch_size_val=32 \
+    --datatype="motionx" \
+    --feature_framerate=1 \
+    --freeze_layer_num=0 \
+    --slice_framepos=2 \
+    --linear_patch=2d \
+    --pretrained_clip_name="ViT-L/14" \
+    --output_dir="/saved_results/eventmodel_bsz128_lr1e-3_epoch5_v1_data0.1_new" \
+    --clip_evl \
+    --pretrained_path="/internvideo/InternVideo-MM-L-14.ckpt" \
+    --resume_model_true_object="/saved_results/object_epoch5_bsz128_coeflr4e-3/pytorch_model.bin" \
+    --resume_model_true_action="/saved_results/motionbert_bsz2048_lr1e-4_epoch10_scale100_two_loss/pytorch_model.bin" \
+    --mlp_lr=1e-3 \
+    --train_tower="event" \
+    --verb_model="internvideo" \
+    --action_model="motionbert" \
+    --warmup_proportion=0.1
