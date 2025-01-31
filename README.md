@@ -5,11 +5,7 @@ This is an anonymous repository. We will be releasing the HcVD database soon, al
 ### 👀 Some visualization results
 The following text comes from the IDEA400 test set. The model that generated the following results was not trained on the IDEA400 training set.
 
-
-https://github.com/user-attachments/assets/c6605e54-f611-4246-a2a7-77b17c995341
-
-
-#### Attention: 
+😊😊😊 We have prepared anonymous video URLs below for you in case the video fails to load.
 <div style="text-align: center;">
   
 | Text: The person is bending over to put food on the floor for a pet, then straightening up and stepping back to standing position. | Text: The person appears to be mimicking the action of riding a bicycle while standing up; alternating raising knees as if pedaling, and swinging arms as though holding handlebars. | Text: The person is standing upright with a rapid sequence of raising both fists from waist level to above the head and then lowering them back down in a cheering motion. |
