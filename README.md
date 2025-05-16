@@ -1,9 +1,9 @@
 # Pre-released VimoRAG
-This is an anonymous repository. We will be releasing the HcVD database soon, along with all the training and inference codes for VimoRAG, as well as the pre-trained models. Please stay in tuned~
+This is an anonymous repository. We will be releasing the HcVD database soon, along with the complete codes (pre-trained models). Please stay in tuned~
 
 
-### 👀 Some visualization results
-The following text comes from the IDEA400 test set. The model that generated the following results was not trained on the IDEA400 training set.
+### 👀 Some zero-shot visualization results
+The following results are obtained on the IDEA400 test set, while our model is trained solely on the HumanML3D training set.
 
 😊😊😊 We have prepared anonymous video URLs below for you in case the video fails to load.
 <div style="text-align: center;">
