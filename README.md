@@ -1,5 +1,6 @@
-# Pre-released VimoRAG
-This is an anonymous repository. We will be releasing the HcVD database soon, along with the complete codes (pre-trained models). Please stay in tuned~
+## 🚀 Coming Soon  
+We will release **all resources within 1 month**. Stay tuned! 🎉
+
 
 
 ### 👀 Some zero-shot visualization results
