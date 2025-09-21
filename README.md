@@ -1,5 +1,5 @@
-## 🚀 Coming Soon  
-We will release **all resources within 1 month**. Stay tuned! 🎉
+## 🚀 Rushing to Prepare
+We’ll release all resources before **October 8!** Stay tuned!  🎉
 
 
 
