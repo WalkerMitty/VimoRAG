@@ -151,6 +151,7 @@ def get_args(description='CLIP4Clip on Retrieval Task'):
     parser.add_argument("--k", type=int, default=1, help="choose the topk video")
     parser.add_argument("--saved_video_embed",type=str,default=None,help='the wild video embeddings path file')
 
+
     parser.add_argument("--cache_video",action='store_true',help='whether to enable the multigpu mode to cache the video feature')
     parser.add_argument("--num",type=int,default=-1,help='-1 means no multi gpu mode')
     parser.add_argument("--threads", type=int, default=24, help='the gpu numbers')
@@ -318,7 +319,6 @@ def init_model(args, device, n_gpu, local_rank):
 
 def init_model_for_three(args, device, n_gpu, local_rank):
 
-
     # Prepare model
     cache_dir = args.cache_dir if args.cache_dir else os.path.join(str(PYTORCH_PRETRAINED_BERT_CACHE), 'distributed')
     args.train_tower = 'object'
@@ -357,9 +357,10 @@ def _run_on_single_gpu(model, batch_list_t, batch_list_v, batch_sequence_output_
         sim_matrix = []
         new_visual_embed = []
         for idx1, b1 in enumerate(tqdm(batch_list_t)):
-            if count>=real_text_number:
+            if count>=real_text_number: #after this all padding
                 break
             input_mask, *_tmp = b1
+            # print('input mask')
             sequence_output = batch_sequence_output_list[idx1]
             cur_bsz = sequence_output.size()[0]
             count+=cur_bsz
@@ -369,13 +370,13 @@ def _run_on_single_gpu(model, batch_list_t, batch_list_v, batch_sequence_output_
                 visual_output = batch_visual_output_list[idx2]
 
                 b1b2_logits, cur_visual= model.get_similarity_logits(sequence_output, visual_output, video_mask,action=action)
-       
+                # print('debug3',b1b2_logits.size())
                 b1b2_logits = b1b2_logits.cpu().detach().numpy()
                 each_row.append(b1b2_logits)
                 if idx1==0:
                     new_visual_embed.append(cur_visual)
             each_row = np.concatenate(tuple(each_row), axis=-1)
-            sim_matrix.append(each_row)
+            sim_matrix.append(each_row) 
 
         return sim_matrix,new_visual_embed
     else:
@@ -383,7 +384,7 @@ def _run_on_single_gpu(model, batch_list_t, batch_list_v, batch_sequence_output_
         for idx1, b1 in enumerate(batch_list_t):
 
             input_mask, *_tmp = b1
-            # print('input mask')
+
             sequence_output = batch_sequence_output_list[idx1]
             each_row = []
             for idx2, b2 in enumerate(batch_list_v):
@@ -391,15 +392,14 @@ def _run_on_single_gpu(model, batch_list_t, batch_list_v, batch_sequence_output_
                 visual_output = batch_visual_output_list[idx2]
 
                 b1b2_logits= model.get_similarity_logits(sequence_output, visual_output, video_mask,action=action)
-      
                 b1b2_logits = b1b2_logits.cpu().detach().numpy()
                 each_row.append(b1b2_logits)
             each_row = np.concatenate(tuple(each_row), axis=-1)
-            sim_matrix.append(each_row) 
+
+            sim_matrix.append(each_row)
         return sim_matrix
 
 def _run_on_single_gpu_event_model(model,batch_input_ids,batch_sequence_obj,batch_sequence_act,real_text_number):
-
     count = 0
     all_weight_act,all_weight_obj = [],[]
     for index,input_ids in enumerate(tqdm(batch_input_ids)):
@@ -423,14 +423,9 @@ def _run_on_single_gpu_event_model(model,batch_input_ids,batch_sequence_obj,batc
 def get_all_query_text(query_file):
     '''
     '''
-
-    # wild_videos_database = get_wild()
     with open(query_file,'r') as f:
         query = json.load(f)
     query = query
-    # with open(doc_file,'r') as f:
-    #     doc = json.load(f)
-    # print('the query number is ',len(query)) 
     final_data = []
     for index,item in enumerate(query):
         text = item['text']
@@ -468,7 +463,6 @@ def eval_epoch(args, model, test_dataloader, device, n_gpu,logger=None,object_mo
 
         # ----------------------------
         # 1. cache the features
-
         for bid, batch in enumerate(tqdm(test_dataloader)):
             batch = tuple(t.to(device) for t in batch)
             # input_ids, input_mask, segment_ids, video, video_mask,motion_ids,video_paths = batch
@@ -487,7 +481,6 @@ def eval_epoch(args, model, test_dataloader, device, n_gpu,logger=None,object_mo
             bsz = input_ids.size()[0]
             if bsz*bid >real_text_number and args.cache_video==False:
                 break
-            # import ipdb;ipdb.set_trace() input_ids, attention_mask:  [bsz,1,77]
             if args.train_tower=='object':
                 batch_list_v.append((video_mask,))
                 sequence_output, visual_output = model.get_sequence_visual_output(input_ids,video, video_mask)
@@ -524,7 +517,7 @@ def eval_epoch(args, model, test_dataloader, device, n_gpu,logger=None,object_mo
                 batch_list_v_obj = torch.load(args.saved_video_embed.replace('.pth','obj_mask.pth'))
                 batch_list_v_act = torch.load(args.saved_video_embed.replace('.pth','act_mask.pth'))
         
-                batch_visual_output_list_obj = [tensor.to(device) for tensor in batch_visual_output_list_obj]
+                batch_visual_output_list_obj = [tensor.to(device) for tensor in batch_visual_output_list_obj] #2825全量list大小
                 batch_visual_output_list_act = [tensor.to(device) for tensor in batch_visual_output_list_act]
                 batch_list_v_obj = [(tup[0].to(device),) for tup in batch_list_v_obj]
                 batch_list_v_act = [(tup[0].to(device),) for tup in batch_list_v_act]
@@ -532,11 +525,11 @@ def eval_epoch(args, model, test_dataloader, device, n_gpu,logger=None,object_mo
                 batch_visual_output_list_obj = torch.load(args.saved_video_embed.replace('.pth','obj.pth'))
                 batch_list_v_obj = torch.load(args.saved_video_embed.replace('.pth','obj_mask.pth'))
         
-                batch_visual_output_list_obj = [tensor.to(device) for tensor in batch_visual_output_list_obj]
+                batch_visual_output_list_obj = [tensor.to(device) for tensor in batch_visual_output_list_obj] #2825全量list大小
       
                 batch_list_v_obj = [(tup[0].to(device),) for tup in batch_list_v_obj]
     
-
+            # import pdb;pdb.set_trace()
             all_video_paths = get_wild()
 
 
@@ -545,11 +538,13 @@ def eval_epoch(args, model, test_dataloader, device, n_gpu,logger=None,object_mo
             if args.train_tower=='object':
                 torch.save(batch_visual_output_list,args.saved_video_embed.replace('.pth',f'obj_{str(args.num)}.pth'))
                 torch.save(batch_list_v,args.saved_video_embed.replace('.pth',f'obj_mask_{str(args.num)}.pth'))
+                print('The intermediate results have been successfully saved!')
                 return 
             torch.save(batch_visual_output_list_obj,args.saved_video_embed.replace('.pth',f'obj_{str(args.num)}.pth'))
             torch.save(batch_visual_output_list_act,args.saved_video_embed.replace('.pth',f'act_{str(args.num)}.pth'))
             torch.save(batch_list_v_obj,args.saved_video_embed.replace('.pth',f'obj_mask_{str(args.num)}.pth'))
             torch.save(batch_list_v_act,args.saved_video_embed.replace('.pth',f'act_mask_{str(args.num)}.pth'))
+            print('The intermediate results have been successfully saved!')
             return
 
         if args.train_tower=='event':
@@ -588,8 +583,6 @@ def main():
 
     tokenizer = ClipTokenizer()
 
-    # assert  args.task_type == "retrieval"
-    # model = init_model(args, device, n_gpu, args.rank)
     if args.train_tower=='event':
         object_model,action_model,model = init_model_for_three(args, device, n_gpu, args.rank)
         # model = None
@@ -614,7 +607,7 @@ def main():
         val_dataloader, val_length = DATALOADER_DICT[args.datatype]["val"](args, tokenizer, subset="val")
     else:
         val_dataloader, val_length = test_dataloader, test_length
-
+    # import pdb;pdb.set_trace()
     ## report validation results if the ["test"] is None
     if test_dataloader is None:
         test_dataloader, test_length = val_dataloader, val_length
@@ -635,83 +628,16 @@ def main():
 
 
 def get_wild()->list:
-    video_data_base = '/dataset/alphapose_motionbert/motionbertprocessed.pth'
+    video_data_base = '../resources/motionbertprocessed.pth'
     raw_data = torch.load(video_data_base)
     all_videos_path = list(raw_data.keys())
 
     return all_videos_path
 
-def get_subdirectories(directory):
-    subdirectories = []
-    for item in os.listdir(directory):
-        item_path = os.path.join(directory, item)
-        if os.path.isdir(item_path):  
-            subdirectories.append(item_path)
-    return subdirectories
-
-def construct_wild():
-
-    query_file = 'dataset/llm_generated_motions/seed2024_kit_test.json'
-    final_file = 'dataset/retrieval_inference_wild/test_kit_wild.json'
-    wild_videos_database = get_wild()
-    with open(query_file,'r') as f:
-        query = json.load(f)
-
-    all_text = []
-    for key,value in query.items():
-        all_text.append(key)
-    # for item in tqdm(query): # for process train_kit!
-    #     all_text.append(item['conversations'][0]['value'].split('Motion description: ')[1])
-    # print(all_text[:2])
-    # exit()
-
-    print('the query number is ',len(all_text))
-    # exit()
-    final_data = []
-    for index,item in enumerate(tqdm(wild_videos_database)):
-        temp_dict = {}
-        temp_dict['video_path'] = item
-        if index<len(query):
-            # temp_dict['text'] = query[index]['conversations'][0]['value'].split('Motion description: ')[-1] # for train
-            temp_dict['text'] = all_text[index]
-        else:
-            temp_dict['text'] = 'padding'
-            # temp_dict['text_id'] = 'padding'
-        final_data.append(temp_dict)
-    with open(final_file,'w') as f:
-        json.dump(final_data,f)
 
 
-def merge_sim_obtain_topk():
-    args = get_args()
-    sim_matrix = []
-    for i in range(2,4):
-        cur_sim_matrix = torch.load(f'dataset/retrieval_inference_wild/sim_matrix_{i}.pth')
-        sim_matrix.append(cur_sim_matrix)
-    # sim_matrix = torch.cat(sim_matrix,dim=0)
-    sim_matrix = np.concatenate(sim_matrix, axis=0)
-    print(sim_matrix.shape)
-    top_k_indices = np.argsort(sim_matrix, axis=1)[:, -args.k]
-    final_dict = {}
-    all_video_paths = get_wild()
-    all_text = get_all_query_text(args.query_text_file)
-    for index,text in enumerate(tqdm(all_text)):
-        final_dict[text] = all_video_paths[top_k_indices[index]]
-    with open(args.inference_result,'w') as f:
-        json.dump(final_dict,f)
 
 
 
 if __name__ == "__main__":
-
-
-    # construct_wild()
-    # exit()
     main()
-    # temp()
-    # merge_all_video_fea()
-    # merge_sim_obtain_topk()
-    # args = get_args()
-    # t = get_all_query_text(args.query_text_file)
-    # print(len(set(t)))
-

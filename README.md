@@ -1,22 +1,114 @@
-## 🚀 Rushing to Prepare
-We’ll release all resources before **October 8!** Stay tuned!  🎉
+## VimoRAG: Video-based Retrieval-augmented 3D Motion Generation for Motion Language Models
+
+## 📰 News
+
+- **The training, inference and visualization codes are released.** 2025-10
+- **🎉🎉🎉 The paper is accepted by NeurIPS 2025.**
+
+## 📂 README Overview
 
 
+- [VimoRAG: Video-based Retrieval-augmented 3D Motion Generation for Motion Language Models](#vimorag-video-based-retrieval-augmented-3d-motion-generation-for-motion-language-models)
+- [📰 News](#-news)
+- [📂 README Overview](#-readme-overview)
+- [🎮 Demo (DIY)](#-demo-diy)
+  - [Retrieval](#retrieval)
+  - [Generation](#generation)
+- [📊 Evaluation](#-evaluation)
+- [🏋️ Training](#️-training)
+  - [stage 1](#stage-1)
+  - [stage 2](#stage-2)
+- [Acknowledgements](#acknowledgements)
 
-### 👀 Some zero-shot visualization results
-The following results are obtained on the IDEA400 test set, while our model is trained solely on the HumanML3D training set.
+## 🎮 Demo (DIY)
+Just input a sentence, then we will retrieve a video, and then feed them to LLM to generate 3D human motion.
 
-😊😊😊 We have prepared anonymous video URLs below for you in case the video fails to load.
-<div style="text-align: center;">
-  
-| Text: The person is bending over to put food on the floor for a pet, then straightening up and stepping back to standing position. | Text: The person appears to be mimicking the action of riding a bicycle while standing up; alternating raising knees as if pedaling, and swinging arms as though holding handlebars. | Text: The person is standing upright with a rapid sequence of raising both fists from waist level to above the head and then lowering them back down in a cheering motion. |
-| :----------------------: | :----------------------: | :----------------------: |
-| <video src="https://github.com/user-attachments/assets/b1caaa46-a117-43d6-be04-0c8a52a1f536" style="width:220px; height:240px; display: block; margin: 0 auto; max-width: 100%; max-height: 100%;" /> | <video src="https://github.com/user-attachments/assets/61489f69-9257-4d5b-add7-b978e59b2e6a" style="width:220px; height:240px;" /> | <video src="https://github.com/user-attachments/assets/97c6054a-c69d-4184-8684-6fb16764fd01" style="width:220px; height:240px;" /> |
-|https://github.com/user-attachments/assets/b1caaa46-a117-43d6-be04-0c8a52a1f536|https://github.com/user-attachments/assets/61489f69-9257-4d5b-add7-b978e59b2e6a |https://github.com/user-attachments/assets/97c6054a-c69d-4184-8684-6fb16764fd01|
-| **Text: The person is performing a punching motion while standing stationary. He is transitioning from a relaxed stance to a boxing stance, throwing a series of punches, and then returning to the relaxed stance.** | ****Text:** The person is performing a stationary basketball shooting motion. Starting from a standing position, they bend their knees to generate power, raise the ball with both hands in front of them, extend their arms upwards while jumping slightly, and then follow through with one hand to release the ball, mimicking a basketball shot.** | **Text:** **The person is walking back and forth in a room, turning slightly at each end, and appears to be fanning themselves continuously with one hand as they go.** |
-| <video src="https://github.com/user-attachments/assets/a5bde1d0-378e-4059-9591-815adc709246" style="width:220px; height:240px;" /> | <video src="https://github.com/user-attachments/assets/669ef0c5-4d7d-4206-b8b9-5bc63b97e53a" style="width:220px; height:240px;" /> | <video src="https://github.com/user-attachments/assets/36a6bfc0-58e9-4a7a-a9a1-5f6790dc1a06" style="width:220px; height:240px;" /> |
-|https://github.com/user-attachments/assets/a5bde1d0-378e-4059-9591-815adc709246|https://github.com/user-attachments/assets/669ef0c5-4d7d-4206-b8b9-5bc63b97e53a|https://github.com/user-attachments/assets/36a6bfc0-58e9-4a7a-a9a1-5f6790dc1a06|
-| **Text: The person is squatting down and lifting a potted plant while then sitting on the floor with the plant.** | ****Text:** The person is standing and making a phone call gesture. They lift their right hand to their ear as if holding a phone. Their body remains relatively static while performing the gesture.** | **Text:** **The person is preparing to throw a frisbee. Starting with a stance where the weight is on the back foot, they shift the weight forward, bringing the arm with the frisbee back for momentum. Then, they step forward with the opposite leg, rotating the torso and extending the arm to release the frisbee.** |
-| <video src="https://github.com/user-attachments/assets/892ae8c3-f8c8-426e-a7a8-5d4f13fca883" style="width:220px; height:240px;" /> | <video src="https://github.com/user-attachments/assets/c148cc9d-4919-48c1-b7b9-3877a9ba2203" style="width:220px; height:240px;" /> | <video src="https://github.com/user-attachments/assets/d3002052-59e6-4a1a-a7f0-b8ee280bba1a" style="width:220px; height:240px;" /> |
-|https://github.com/user-attachments/assets/892ae8c3-f8c8-426e-a7a8-5d4f13fca883|https://github.com/user-attachments/assets/c148cc9d-4919-48c1-b7b9-3877a9ba2203|https://github.com/user-attachments/assets/d3002052-59e6-4a1a-a7f0-b8ee280bba1a|
-</div>
+### Retrieval
+
+- Environment
+```shell
+cd Gemini-MVR
+conda env create -f environment.yml
+conda activate gemini-mvr
+
+pip install torch==1.8.1+cu111 torchvision==0.9.1+cu111 torchaudio==0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
+```
+- Run
+```shell
+python prepare_input.py --text "The person is performing a punching motion while standing stationary. He is transitioning from a relaxed stance to a boxing stance, throwing a series of punches, and then returning to the relaxed stance."
+
+bash eval_finetuned_scripts/diy_inference.sh 
+```
+
+
+### Generation
+- Environment
+
+```shell
+cd McDPO
+conda env create -f environment.yml
+conda activate mcdpo
+bash additional_env.sh
+
+```
+- Run
+```shell
+python llm_inference.py --retrieval_result ../Gemini-MVR/diy_output/retrieval_result.json --out_dir ../output --temperature 0.85 --lora --model_path ../output/dpo_model --llm_seed 2024 --model_base ../output/sft_model/merged_lora --demo_inference
+
+## For visualization
+python generate_motion.py --generated_file ../output/start-1.json --out_dir ../output/visual_output --render
+```
+
+
+## 📊 Evaluation
+
+```shell
+python evaluate_for_generated_results.py --generated_file ../resources/llm_generated_text/no_motion_r128_a256_bsz8x8_epoch2_new_llmseed2024_test_t2m/merge.json --split test --dataname t2m
+```
+## 🏋️ Training
+
+### stage 1
+Visual Demonstration-Enhanced Instruction Tuning
+
+
+```shell
+bash scripts/stage1.sh
+```
+
+- Merge Lora weight
+```shell
+# merge lora for stage 2
+python llm_inference.py --merge_lora --model_base ../resources/playground/Phi-3-mini-4k-instruct --model_path ../output/sft_model --out_dir ../output/sft_model/merged_lora
+```
+### stage 2
+Motion-centric Dual-alignment DPO
+
+<details>
+<summary><b>Dataset Preparation Steps (Click to Expand)</b></summary>
+
+Sample the SFT model three times to obtain candidate data.
+
+Note: This step is time-consuming, so we've prepared the data for you in advance.
+```shell
+python llm_inference.py --retrieval_result ../resources/retrieval_inference_wild/train_t2m_top1_wild_new.json --seed 2024 --llm_seed 2024 --out_dir ../resources/llm_generated_text/no_motion_r128_a256_bsz8x8_epoch2_new_llmseed2024_train --temperature 0.9 --split train --lora --model_path ../output/sft_model --model_base ../resources/playground/Phi-3-mini-4k-instruct
+```
+
+- Generate the preference data for McDPO training
+```shell
+python evaluate_for_generated_results.py --generated_file ../resources/dataset/t2m_r128_a256_bsz8x8_epoch2_new_train_3seed.json --fid_weight 0.9 --match_weight 0.1 --split train --dataname t2m --vqvae_path ../resources/pretrained_vqvae/t2m.pth --sft_file ../resources/dataset/train_top1_t2m_new.json --dpo_file ../resources/dataset/no_motion_r128_a256_bsz8x8_epoch2_new_train_3seed_self.json --dpo_selection
+```
+</details>
+
+
+- Training
+
+```shell
+bash scripts/stage2.sh
+```
+
+## Acknowledgements
+
+- [MotionGPT](https://github.com/qiqiApink/MotionGPT)
+- [InternVideo](https://github.com/OpenGVLab/InternVideo)
+- [VideoGPT-plus](https://github.com/mbzuai-oryx/VideoGPT-plus)
+- [LLaVA-Hound-DPO](https://github.com/RifleZhang/LLaVA-Hound-DPO)

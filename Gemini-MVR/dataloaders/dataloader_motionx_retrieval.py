@@ -47,9 +47,9 @@ class MOTIONX_DataLoader(Dataset):
     ):
         if train_tower!='object':
             if action_model=='wham':
-                self.cache_keypoints = torch.load('dataset/sft_data/cache_keypoints/cache_keypoints_mergev1.pth')
+                self.cache_keypoints = torch.load('../cache_keypoints/cache_keypoints_mergev1.pth')
             elif action_model=='motionbert':
-                self.cache_keypoints = torch.load('dataset/alphapose_motionbert/motionbertprocessed.pth')
+                self.cache_keypoints = torch.load('../resources/motionbertprocessed.pth')
             else:
                 raise ValueError()
         self.action_model = action_model
@@ -233,12 +233,12 @@ class MOTIONX_DataLoader(Dataset):
                 cur_keypoints = self.cache_keypoints[video_file_path]
             except:
                 print('cache_keypoints read fails, loading the default one')
-                cur_keypoints = self.cache_keypoints['dataset/wild_motion_videos/aslan/7-0005.mp4']
+                cur_keypoints = self.cache_keypoints['../resources/wild_motion_videos/aslan/7-0005.mp4']
             keypoints = cur_keypoints['keypoints'] #[1,16,37]
             init_kp = cur_keypoints['init_kp'] #[1,1,88]
-            key_mask = cur_keypoints['key_mask'] # [1,16,17]
+            key_mask = cur_keypoints['key_mask'] # [1,16,17]这个key mask不是长度的padding mask，是一种特征
             motion_mask[i][:key_mask.shape[1]] = [1] * key_mask.shape[1]
-            if key_mask.size()[1]< self.max_frames: #batch
+            if key_mask.size()[1]< self.max_frames: #batch 训练进行padding
                 padding_num = self.max_frames - key_mask.size()[1]
                 temp = torch.zeros(1,padding_num, 17, dtype=torch.bool)
                 temp2 = torch.zeros(1,padding_num, 37,dtype=keypoints.dtype)
@@ -263,21 +263,20 @@ class MOTIONX_DataLoader(Dataset):
                 cur_keypoints = self.cache_keypoints[video_file_path] #[n,17,3]
             except:
                 print('cache_keypoints read fails, loading the default one')
-                cur_keypoints = self.cache_keypoints['dataset/wild_motion_videos/aslan/7-0005.mp4']
+                cur_keypoints = self.cache_keypoints['../resources/wild_motion_videos/aslan/7-0005.mp4']
             
             motion_mask[i][:cur_keypoints.shape[0]] = [1] * cur_keypoints.shape[0]
-            if cur_keypoints.shape[0]< self.max_frames: #batch 训练进行padding
+            if cur_keypoints.shape[0]< self.max_frames:
                 padding_num = self.max_frames - cur_keypoints.shape[0]
                 temp = np.zeros((padding_num, 17, 3), dtype=cur_keypoints.dtype)
                 cur_keypoints = np.concatenate((cur_keypoints, temp), axis=0)
 
             all_keypoints.append(cur_keypoints)
             
-        #return all_keypoints [len(video_paths), 16,17,3]
         return np.array(all_keypoints),motion_mask
 
     def __getitem__(self, idx):
-        video_id = self.data['video_id'][idx]
+        video_id = self.data['video_id'][idx] 
         sentence = self.data['sentence'][idx]
         if self.verb_model=='bert':
             pairs_text,pairs_mask,choice_video_ids = self._get_text_bert(video_id,sentence)
@@ -351,31 +350,12 @@ class MOTIONX_TrainDataLoader(Dataset):
         # self.cache_keypoints = {}
         if self.train_tower!='object':
             if action_model=='wham':
-                self.cache_keypoints = torch.load('dataset/sft_data/cache_keypoints/cache_keypoints_mergev1.pth')
+                self.cache_keypoints = torch.load('../cache_keypoints/cache_keypoints_mergev1.pth')
             elif action_model=='motionbert':
-                self.cache_keypoints = torch.load('dataset/alphapose_motionbert/motionbertprocessed.pth')
+                self.cache_keypoints = torch.load('../resources/motionbertprocessed.pth')
             else:
                 raise ValueError()
-        # else:
-        #     num_sentences = 0
-        #     self.sentences = defaultdict(list)
-        #     s_video_id_set = set()
-        #     for itm in self.data['sentences']:
-        #         self.sentences[itm['video_id']].append(itm['caption'])
-        #         num_sentences += 1
-        #         s_video_id_set.add(itm['video_id'])
 
-        #     # Use to find the clips in the same video
-        #     self.parent_ids = {}
-        #     self.children_video_ids = defaultdict(list)
-        #     for itm in self.data['videos']:
-        #         vid = itm["video_id"]
-        #         url_posfix = itm["url"].split("?v=")[-1]
-        #         self.parent_ids[vid] = url_posfix
-        #         self.children_video_ids[url_posfix].append(vid)
-        #     self.sample_len = len(self.csv)
-
-        # self.rawVideoExtractor = RawVideoExtractor(framerate=feature_framerate, size=image_resolution)
         self.SPECIAL_TOKEN = {"CLS_TOKEN": "<|startoftext|>", "SEP_TOKEN": "<|endoftext|>",
                               "MASK_TOKEN": "[MASK]", "UNK_TOKEN": "[UNK]", "PAD_TOKEN": "[PAD]"}
         self.transform = Compose([
@@ -386,8 +366,7 @@ class MOTIONX_TrainDataLoader(Dataset):
                     Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)),
                     # Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                 ])
-    # def get_cache_keypoints(self,):
-    #     self.cache_keypoints = torch.load('dataset/sft_data/cache_keypoints/cache_keypoints_mergev1.pth')
+
     def __len__(self):
         return self.sample_len
 
@@ -524,18 +503,19 @@ class MOTIONX_TrainDataLoader(Dataset):
                 cur_keypoints = self.cache_keypoints[video_file_path]
             except:
                 print('cache_keypoints read fails, loading the default one')
-                cur_keypoints = self.cache_keypoints['dataset/wild_motion_videos/aslan/7-0005.mp4']
+                cur_keypoints = self.cache_keypoints['../resources/wild_motion_videos/aslan/7-0005.mp4']
             keypoints = cur_keypoints['keypoints'] #[1,16,37]
             init_kp = cur_keypoints['init_kp'] #[1,1,88]
             key_mask = cur_keypoints['key_mask'] # [1,16,17]
             motion_mask[i][:key_mask.shape[1]] = [1] * key_mask.shape[1]
-            if key_mask.size()[1]< self.max_frames: 
+            if key_mask.size()[1]< self.max_frames: #batch 
                 padding_num = self.max_frames - key_mask.size()[1]
                 temp = torch.zeros(1,padding_num, 17, dtype=torch.bool)
                 temp2 = torch.zeros(1,padding_num, 37,dtype=keypoints.dtype)
                 # import ipdb;ipdb.set_trace()
                 key_mask = torch.cat((key_mask,temp),dim=1)
                 keypoints = torch.cat((keypoints,temp2),dim=1)
+
 
             all_keypoints.append(keypoints.squeeze(0).numpy())
             all_init_kp.append(init_kp.squeeze(0).numpy())
@@ -551,7 +531,7 @@ class MOTIONX_TrainDataLoader(Dataset):
                 cur_keypoints = self.cache_keypoints[video_file_path] #[n,17,3]
             except:
                 print('cache_keypoints read fails, loading the default one')
-                cur_keypoints = self.cache_keypoints['dataset/wild_motion_videos/aslan/7-0005.mp4']
+                cur_keypoints = self.cache_keypoints['../resources/wild_motion_videos/aslan/7-0005.mp4']
             
             motion_mask[i][:cur_keypoints.shape[0]] = [1] * cur_keypoints.shape[0]
             if cur_keypoints.shape[0]< self.max_frames:
@@ -559,13 +539,13 @@ class MOTIONX_TrainDataLoader(Dataset):
                 temp = np.zeros((padding_num, 17, 3), dtype=cur_keypoints.dtype)
                 cur_keypoints = np.concatenate((cur_keypoints, temp), axis=0)
 
+
             all_keypoints.append(cur_keypoints)
             
         #return all_keypoints [len(video_paths), 16,17,3]
         return np.array(all_keypoints),motion_mask
     def __getitem__(self, idx):
-        #'video2960',  'xxx'
-        # if self.unfold_sentences:
+
         video_id, caption = self.sentences_dict[idx]
         if self.verb_model == 'bert':
             pairs_text,attention_mask,choice_video_ids = self._get_text_bert(video_id,caption)
@@ -590,22 +570,4 @@ class MOTIONX_TrainDataLoader(Dataset):
 
 
 
-def process_motionx():
-    #change the txt_path in train/val json to txt
-    with open('dataset/motion-x++-videos/train.json','r') as f:
-        file = json.load(f)
-    new_file = []
-    total = 0
-    for item in file:
-        text = open(item['text_path'],'r').read()
-        del item['text_path']
-        item['text'] = text
-        new_file.append(item)
-        total += len(text.split(' '))
-    with open('dataset/motion-x++-videos/train_new.json','w') as f:
-        json.dump(new_file,f)
-    
-    print('average text length',total/len(new_file))
 
-# if __name__ == '__main__':
-    # process_motionx()

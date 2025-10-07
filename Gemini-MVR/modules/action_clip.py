@@ -52,7 +52,7 @@ class VerbModel(nn.Module):
 
         x = x + self.positional_embedding.type(self.dtype)
         #[bsz, 77, 768]
-        x = x.permute(1, 0, 2)  # NLD -> LND. 
+        x = x.permute(1, 0, 2)  # NLD -> LND.
         x = self.transformer(x)
         x = x.permute(1, 0, 2)  # LND -> NLD
         x = self.ln_final(x).type(self.dtype)
@@ -142,17 +142,15 @@ class ActionModel(nn.Module):
 
 def build_action_model(action_model):
     if action_model=='wham':
-        model = ActionModel('checkpoints/wham_vit_bedlam_w_3dpw.pth.tar')
+        model = ActionModel('WHAM/checkpoints/wham_vit_bedlam_w_3dpw.pth.tar')
     else:
-        model = ActionModelBERT('checkpoint/pretrain/latest_epoch.bin')
+        model = ActionModelBERT('../resources/MotionBERT/checkpoint/pretrain/latest_epoch.bin')
     return model.eval()
 
 class PretrainMotionEncoder(nn.Module):
     def __init__(self,model_path):
         super(PretrainMotionEncoder, self).__init__()
         self.motion_encoder = self.build_motion_encoder(model_path)
-        # import ipdb;ipdb.set_trace()
-        # self.freeze()
     def forward(self,x, init,mask):
         _,output = self.motion_encoder(x, init,mask)
         return output
@@ -264,9 +262,6 @@ class MotionEncoder(nn.Module):
         x = x + _mask_embedding
         return x
     def forward(self, x, init,mask):
-        """ Forward pass of motion encoder.
-
-        """
         
         self.b, self.f = x.shape[:2]
         x = self.preprocess(x,mask)

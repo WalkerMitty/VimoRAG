@@ -26,10 +26,10 @@ def dataloader_motionx_train(args, tokenizer):
     train_sampler = torch.utils.data.distributed.DistributedSampler(motionx_dataset)
     dataloader = DataLoader(
         motionx_dataset,
-        batch_size=args.batch_size // args.n_gpu, 
+        batch_size=args.batch_size // args.n_gpu, #一旦传入分布式train_sampler，这里的bsz就指的是单卡bsz
         num_workers=args.num_thread_reader,
         pin_memory=False,
-        shuffle=(train_sampler is None),
+        shuffle=(train_sampler is None), #一旦启用了train_sampler,这里必须是false，否则会报错，真正的shuffle会交给set_epoch(epoch)
         sampler=train_sampler,
         drop_last=True,
         persistent_workers=True,

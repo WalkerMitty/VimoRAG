@@ -1,9 +1,8 @@
-
 import os 
 import torch
 import numpy as np
 import json
-
+import copy
 import random
 from options import option
 import models.vqvae as vqvae
@@ -22,15 +21,14 @@ from typing import Optional
 from tqdm import tqdm
 import torch
 
-# from videogpt_plus.model.builder import load_pretrained_model
-# from videogpt_plus.mm_utils import tokenizer_image_token, get_model_name_from_path
+
 args = option.get_args_parser()
 
 def main() -> None:
 
-    # random.seed(args.seed) 
-    # torch.manual_seed(args.seed)  
-    # torch.cuda.manual_seed(args.seed) 
+    random.seed(args.seed) 
+    torch.manual_seed(args.seed)  
+    torch.cuda.manual_seed(args.seed)
 
     # os.makedirs(args.out_dir, exist_ok = True)
 
@@ -40,7 +38,7 @@ def main() -> None:
 
     from utils.word_vectorizer import WordVectorizer
     w_vectorizer = WordVectorizer('./glove', 'our_vab')
-    val_loader = DATALoader(args.dataname, args.split, 32, w_vectorizer, unit_length=2**args.down_t,seed=args.seed) 
+    val_loader = DATALoader(args.dataname, args.split, 32, w_vectorizer, unit_length=2**args.down_t,seed=args.seed)
 
     if args.dataname == 'kit' : 
         dataset_opt_path = './checkpoints/kit/Comp_v6_KLD005/opt.txt'  
@@ -116,73 +114,61 @@ def main() -> None:
     # logger.info(msg_final)
     print(msg_final)
 
-def generated_ground_truth():
 
-    random.seed(args.seed) 
-    torch.manual_seed(args.seed) 
-    torch.cuda.manual_seed(args.seed) 
+def format_dpo_file(sft_json, selected_json,dpo_json):
 
-    sft_data_file = 'ataset/sft_data/train.json'
-    with open(sft_data_file,'r') as f:
+
+    
+    with open(sft_json,'r') as f:
         sft_data = json.load(f)
-    gt = {}
+    with open(selected_json,'r') as f:
+        selected_data = json.load(f)
+    # with open(gt_json,'r') as f:
+    #     gt_data = json.load(f)
+    final_data = []
+    #selected_data: key:value key is input_text, value is the predicted motions
     for item in tqdm(sft_data):
-        gt[item['conversations'][0]['value'].split('Motion description: ')[-1]] = item['conversations'][1]['value']
-    # os.makedirs(args.out_dir, exist_ok = True)
+        temp_dict = {}
+        cur_text = item['conversations'][0]['value'].split('Motion description: ')[1]
+        conv = item['conversations']
+        try:
+            chosen_answer = selected_data[cur_text]['chosen']
 
-    ##### ---- Logger ---- #####
-    # logger = utils_model.get_logger(args.out_dir)
-    # logger.info(json.dumps(vars(args), indent=4, sort_keys=True))
+            # chosen_answer = gt_data[cur_text]
+        except:
+            continue
+        rejected_answer = selected_data[cur_text]['rejected']
+        temp_dict.update(item)
+        '''
+        conv[1]['value'] = chosen_answer
+        temp_dict['chosen_conversations'] = conv
+        conv[1]['value'] = rejected_answer
+        temp_dict['rejected_conversations'] = conv
+        '''
+        chosen_conv = copy.deepcopy(conv)
+        chosen_conv[1]['value'] = chosen_answer
+        temp_dict['chosen_conversations'] = chosen_conv
 
-    from utils.word_vectorizer import WordVectorizer
-    w_vectorizer = WordVectorizer('./glove', 'our_vab')
-    val_loader = DATALoader(args.dataname, 'train', 32, w_vectorizer, unit_length=2**args.down_t,seed=args.seed)
-    all_selected_text = []
-    for batch_id,batch in enumerate(tqdm(val_loader)):
-        word_embeddings, pos_one_hots, clip_text, sent_len, pose, m_length, token, name = batch
-        all_selected_text += clip_text
+        rejected_conv = copy.deepcopy(conv)
+        rejected_conv[1]['value'] = rejected_answer
+        temp_dict['rejected_conversations'] = rejected_conv
+        final_data.append(temp_dict)
 
-    print('final items size',len(all_selected_text))
-
-    all_dict = {}
-    for text in all_selected_text:
-        all_dict[text] = gt[text]
-    with open(args.generated_file,'w') as f:
-        json.dump(all_dict,f)
-
-
-def select_text():
-
-    random.seed(args.seed) 
-    torch.manual_seed(args.seed)   
-    torch.cuda.manual_seed(args.seed) 
-
-
-    from utils.word_vectorizer import WordVectorizer
-    w_vectorizer = WordVectorizer('./glove', 'our_vab')
-    val_loader = DATALoader(args.dataname, args.split, 32, w_vectorizer, unit_length=2**args.down_t,seed=args.seed) 
-    all_selected_text = []
-    for batch_id,batch in enumerate(tqdm(val_loader)):
-        word_embeddings, pos_one_hots, clip_text, sent_len, pose, m_length, token, name = batch
-        all_selected_text += clip_text
-
-    print('final items size',len(all_selected_text))
-    # exit()
-    all_dict = {}
-    for text in all_selected_text:
-        all_dict[text] = ''
-    with open(args.generated_file,'w') as f:
-        json.dump(all_dict,f)
-
-
-
+    print(len(final_data))
+    with open(dpo_json,'w') as f:
+        json.dump(final_data,f)
 
 def dpo_selection():
     random.seed(args.seed) 
-    torch.manual_seed(args.seed) 
-    torch.cuda.manual_seed(args.seed) 
-    args.candidate_files = [] 
-    
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
+    base = "../resources/llm_generated_text"
+    candidate_files = []
+    for root, dirs, files in os.walk(base):
+        for f in files:
+            if f.lower().endswith(".json"):
+                candidate_files.append(os.path.join(root, f))
+
     from utils.word_vectorizer import WordVectorizer
     w_vectorizer = WordVectorizer('./glove', 'our_vab')
     train_loader = DATALoader(args.dataname, args.split, 32, w_vectorizer, unit_length=2**args.down_t,seed=args.seed)
@@ -208,38 +194,27 @@ def dpo_selection():
                         args.width,
                         3,
                         args.dilation_growth_rate)
-    # resume_pth = f"./checkpoints/pretrained_vqvae/{args.dataname}.pth"
     ckpt = torch.load(args.vqvae_path, map_location='cpu')
     vae.load_state_dict(ckpt['net'], strict=True)
     vae = vae.cuda().eval()
     print('Loading VAE Done')
-
-
-    # fid = []
-    # div = []
-    # top1 = []
-    # top2 = []
-    # top3 = []
-    # matching = []
-    # repeat_time = 3
-
     params = EvaluationParams(
     val_loader=train_loader,
     net=vae,
     eval_wrapper=eval_wrapper,
     generated_file = args.generated_file,
-    candidate_files = args.candidate_files,
+    candidate_files = candidate_files,
     fid_weight = args.fid_weight,
     match_weight = args.match_weight,
     )
     generate_preference_data(params)
+    format_dpo_file(args.sft_file,args.generated_file,args.dpo_file)
 if __name__ == "__main__":
     # warnings.filterwarnings(
     #     # Triggered internally at ../aten/src/ATen/EmptyTensor.cpp:31
     #     "ignore", 
     #     message="ComplexHalf support is experimental and many operators don't support it yet"
-    
-    main()
-    # generated_ground_truth()
-    # dpo_selection()
-    # select_text()
+    if args.dpo_selection:
+        dpo_selection()
+    else:    
+        main()

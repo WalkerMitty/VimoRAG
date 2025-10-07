@@ -11,14 +11,10 @@ import torch.nn.functional as F
 
 from modules.until_module import PreTrainedModel, AllGather, CrossEn, LossWeight
 from modules.module_cross import CrossModel, CrossConfig, Transformer as TransformerClip
-# from modules.our_module_cross import Transformer as TransformerVision
-# from modules.xpool_transformer import Transformer as XpoolTransformer
-# from modules.xpool_transformer import Transformer_self
 from modules.action_clip import build_action_model,build_verb_model
 from modules.module_clip import CLIP, convert_weights
 from modules import clip_evl
-# from modules.clip_evl.model_no_freeze_only_global import vit_only_global_l_sparse8_k400, vit_only_global_b_sparse8_k400
-# from torch.nn.utils.rnn import pad_packed_sequence, pack_padded_sequence
+
 
 logger = logging.getLogger(__name__)
 allgather = AllGather.apply
@@ -218,7 +214,7 @@ class CLIP4Clip(CLIP4ClipPreTrainedModel):
             self.wti_arch = task_config.wti_arch if hasattr(task_config, 'wti_arch') else 0
             self.mlp_layer = task_config.mlp_layer if hasattr(task_config, 'mlp_layer') else 0
             self.cdcr = task_config.cdcr if hasattr(task_config, 'cdcr') else 0
-            if hasattr(task_config, "clip_evl") and task_config.clip_evl == True: #yes below mergeclip false
+            if hasattr(task_config, "clip_evl") and task_config.clip_evl == True: 
                 # import ipdb;ipdb.set_trace()
                 self.clip, _ = clip_evl.load(task_config.pretrained_path, t_size=task_config.max_frames, mergeclip=task_config.mergeclip, mergeweight=task_config.mergeweight, clip_state_dict=clip_state_dict)
                 # import ipdb;ipdb.set_trace()
@@ -250,21 +246,6 @@ class CLIP4Clip(CLIP4ClipPreTrainedModel):
             # self.event_extractor = build_verb_model(task_config.pretrained_path,task_config.verb_model)
             #v1
             self.event_extractor = nn.Linear(768,2)
-            #v3
-            hidden_size = 512
-            # self.event_extractor = nn.Sequential(
-            #     nn.Linear(768, hidden_size),
-            #     nn.ReLU(),
-            #     nn.Linear(hidden_size, 2)
-            # )
-            #v4
-            # self.event_extractor = nn.Sequential(
-            #     nn.Linear(768, hidden_size),
-            #     nn.ReLU(),
-            #     nn.Linear(hidden_size, hidden_size),
-            #     nn.ReLU(),
-            #     nn.Linear(hidden_size, 2)
-            # )
 
         else:
             raise ValueError()
@@ -274,13 +255,11 @@ class CLIP4Clip(CLIP4ClipPreTrainedModel):
         
         # self.loss_dsl = dual_softmax_loss()
     def get_weight(self,input_ids, sequence_output,sequence_output_verb):
-  
         self.temp_count +=1
         if self.training:
             # visual_output = allgather(visual_output, self.task_config)
             input_ids = allgather(input_ids,self.task_config)
-            # sequence_output = allgather(sequence_output, self.task_config)
-            # sequence_output_verb = allgather(sequence_output_verb, self.task_config)
+
             torch.distributed.barrier()
         bs_pair = input_ids.size(0)
         bs_pair_second = sequence_output.size(0)
@@ -366,12 +345,11 @@ class CLIP4Clip(CLIP4ClipPreTrainedModel):
     def get_sequence_output(self, input_ids,shaped=False):
         if shaped is False:
             input_ids = input_ids.view(-1, input_ids.shape[-1])
-            # token_type_ids = token_type_ids.view(-1, token_type_ids.shape[-1])
-            # attention_mask = attention_mask.view(-1, attention_mask.shape[-1])
 
         bs_pair = input_ids.size(0)
 
         sequence_hidden = self.clip.encode_text(input_ids).float()
+            #>>>>
         sequence_hidden = sequence_hidden.view(bs_pair, -1, sequence_hidden.size(-1))
 
         # return sequence_hidden
@@ -456,10 +434,7 @@ class CLIP4Clip(CLIP4ClipPreTrainedModel):
             if self.task_config.action_model=='wham':
                 init_kp = init_kp.squeeze(1)
                 key_mask = key_mask.squeeze(1)
-            # video = torch.as_tensor(video).float()
-            # b, pair, bs, ts, channel, h, w = video.shape
-            # video = video.view(b * pair * bs * ts, channel, h, w)
-            # video_frame = bs * ts   
+
         sequence_output = self.get_verb_output(input_ids,attention_mask,shaped=True)
         visual_output = self.get_action_output(key_points,init_kp,key_mask)
         return sequence_output,visual_output        
@@ -529,8 +504,8 @@ class CLIP4Clip(CLIP4ClipPreTrainedModel):
         return retrieve_logits,visual_output
 
     def _loose_similarity(self, sequence_output,visual_output,video_mask):
-
-        if self.training: 
+ 
+        if self.training:
             visual_output = allgather(visual_output, self.task_config)
             video_mask = allgather(video_mask, self.task_config)
             sequence_output = allgather(sequence_output, self.task_config)

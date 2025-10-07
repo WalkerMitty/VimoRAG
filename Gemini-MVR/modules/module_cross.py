@@ -109,11 +109,7 @@ class ResidualAttentionBlock(nn.Module):
 
     def attention(self, x: torch.Tensor, attn_mask: torch.Tensor):
         attn_mask_ = attn_mask.repeat_interleave(self.n_head, dim=0)
-        # print(x.size())
-        # print(attn_mask.size())
-        # torch.Size([1, 32, 768])
-# torch.Size([32, 12, 12])
-        #是否会报错？
+
         return self.attn(x, x, x, need_weights=False, attn_mask=attn_mask_)[0]
         # return self.attn(x, x, x, need_weights=False, attn_mask=None)[0]
 

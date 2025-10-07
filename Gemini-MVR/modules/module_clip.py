@@ -39,7 +39,7 @@ _PT_NAME = {
 def _download(url: str, root: str = os.path.expanduser("~/.cache/clip")):
     os.makedirs(root, exist_ok=True)
     # import ipdb;ipdb.set_trace()
-    root = 'explore/intervid/InternVideo/InternVideo1/Downstream/Video-Text-Retrieval/models'
+    root = '/mnt/data/nas/haidong/explore/intervid/InternVideo/InternVideo1/Downstream/Video-Text-Retrieval/models'
     filename = os.path.basename(url)
 
     expected_sha256 = url.split("/")[-2]

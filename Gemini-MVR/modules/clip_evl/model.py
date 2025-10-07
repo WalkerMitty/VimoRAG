@@ -29,6 +29,36 @@ class QuickGELU(nn.Module):
         return x * torch.sigmoid(1.702 * x)
 
 
+# COUNT = 0
+# # just for the explaining experiment
+# class ResidualAttentionBlock(nn.Module):
+#     def __init__(self, d_model: int, n_head: int, attn_mask: torch.Tensor = None):
+#         super().__init__()
+
+#         self.attn = nn.MultiheadAttention(d_model, n_head)
+#         self.ln_1 = LayerNorm(d_model)
+#         self.mlp = nn.Sequential(OrderedDict([
+#             ("c_fc", nn.Linear(d_model, d_model * 4)),
+#             ("gelu", QuickGELU()),
+#             ("c_proj", nn.Linear(d_model * 4, d_model))
+#         ]))
+#         self.ln_2 = LayerNorm(d_model)
+#         self.attn_mask = attn_mask
+#         # self.count = 0
+#     def attention(self, x: torch.Tensor):
+#         self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
+#         return self.attn(x, x, x, need_weights=True, attn_mask=self.attn_mask)
+
+#     def forward(self, x: torch.Tensor):
+#         global COUNT 
+#         temp = self.attention(self.ln_1(x))
+#         x = x + temp[0]
+#         # import pdb;pdb.set_trace()
+#         # print('done')
+#         torch.save(temp[1][0][-1],f'/mnt/workspace/haidong/dataset/explain/text_encoder/text14/object_layer{str(COUNT)}.pth')
+#         COUNT+=1
+#         x = x + self.mlp(self.ln_2(x))
+#         return x
 # original version
 class ResidualAttentionBlock(nn.Module):
     def __init__(self, d_model: int, n_head: int, attn_mask: torch.Tensor = None):

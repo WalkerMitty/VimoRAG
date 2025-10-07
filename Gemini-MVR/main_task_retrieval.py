@@ -275,6 +275,7 @@ def init_model(args, device, n_gpu, local_rank):
 def init_model_for_three(args, device, n_gpu, local_rank):
 
 
+
     # Prepare model
     cache_dir = args.cache_dir if args.cache_dir else os.path.join(str(PYTORCH_PRETRAINED_BERT_CACHE), 'distributed')
     args.train_tower = 'object'
@@ -322,13 +323,13 @@ def prep_optimizer(args, model, num_train_optimization_steps, device, n_gpu, loc
     no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
     #video_weight_fc
     decay_param_tp = [(n, p) for n, p in param_optimizer if not any(nd in n for nd in no_decay)] 
-    no_decay_param_tp = [(n, p) for n, p in param_optimizer if any(nd in n for nd in no_decay)]
+    no_decay_param_tp = [(n, p) for n, p in param_optimizer if any(nd in n for nd in no_decay)] 
 
     decay_clip_param_tp = [(n, p) for n, p in decay_param_tp if "clip." in n]
-    decay_noclip_param_tp = [(n, p) for n, p in decay_param_tp if "clip." not in n] # video_weight_fc
+    decay_noclip_param_tp = [(n, p) for n, p in decay_param_tp if "clip." not in n] 
 
     no_decay_clip_param_tp = [(n, p) for n, p in no_decay_param_tp if "clip." in n]
-    no_decay_noclip_param_tp = [(n, p) for n, p in no_decay_param_tp if "clip." not in n] #video_weight_fc.bias
+    no_decay_noclip_param_tp = [(n, p) for n, p in no_decay_param_tp if "clip." not in n]
 
     weight_decay = 0.2
 
@@ -336,14 +337,14 @@ def prep_optimizer(args, model, num_train_optimization_steps, device, n_gpu, loc
     if args.train_tower=='action': 
         optimizer_grouped_parameters = [
             {'params': [p for n, p in decay_clip_param_tp], 'weight_decay': weight_decay, 'lr': args.lr * coef_lr},
-            {'params': [p for n, p in decay_noclip_param_tp], 'weight_decay': weight_decay,'lr':args.mlp_lr}, 
-            {'params': [p for n, p in no_decay_clip_param_tp], 'weight_decay': 0.0, 'lr': args.lr * coef_lr}, 
-            {'params': [p for n, p in no_decay_noclip_param_tp], 'weight_decay': 0.0, 'lr':args.mlp_lr} 
+            {'params': [p for n, p in decay_noclip_param_tp], 'weight_decay': weight_decay,'lr':args.mlp_lr},
+            {'params': [p for n, p in no_decay_clip_param_tp], 'weight_decay': 0.0, 'lr': args.lr * coef_lr},
+            {'params': [p for n, p in no_decay_noclip_param_tp], 'weight_decay': 0.0, 'lr':args.mlp_lr}
         ]
     elif args.train_tower=='object':
         optimizer_grouped_parameters = [
             {'params': [p for n, p in decay_clip_param_tp], 'weight_decay': weight_decay, 'lr': args.lr * coef_lr},
-            {'params': [p for n, p in decay_noclip_param_tp], 'weight_decay': weight_decay}, 
+            {'params': [p for n, p in decay_noclip_param_tp], 'weight_decay': weight_decay},
             {'params': [p for n, p in no_decay_clip_param_tp], 'weight_decay': 0.0, 'lr': args.lr * coef_lr},
             {'params': [p for n, p in no_decay_noclip_param_tp], 'weight_decay': 0.0}
         ]
@@ -430,8 +431,7 @@ def train_epoch(epoch, args, model, train_dataloader, device, n_gpu, optimizer, 
             input_ids,attention_mask, video, video_mask = batch
             key_points = init_kp = key_mask = motion_mask = None
 
-        # for n,p in model.named_parameters():
-        #     print(f'{n}. grad {p.requires_grad}')
+
         loss = model(input_ids,attention_mask,video, video_mask,key_points,init_kp,key_mask,motion_mask,objectmodel,actionmodel)
 
         if n_gpu > 1:
@@ -443,7 +443,6 @@ def train_epoch(epoch, args, model, train_dataloader, device, n_gpu, optimizer, 
 
         loss.backward()
 
-        
         total_loss += float(loss)
         if (step + 1) % args.gradient_accumulation_steps == 0:
 
@@ -483,12 +482,13 @@ def main():
     args = set_seed_logger(args)
     device, n_gpu = init_device(args, args.rank)
     if args.verb_model=='bert':
-        tokenizer = AutoTokenizer.from_pretrained("llms/bert-base-uncased")
+        tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
     elif args.verb_model == 'internvideo':
         tokenizer = ClipTokenizer()
     else:
         raise ValueError()
-
+    # import pdb;pdb.set_trace()
+    # assert  args.task_type == "retrieval"
     if args.train_tower=='event':
         objectmodel,actionmodel,model = init_model_for_three(args,device,n_gpu,args.rank)
     else:
@@ -596,7 +596,6 @@ def main():
                 ########## here we save the last ckpt #############
                 ########## feel free to modify this for saving the best ckpt #######
                 output_model_file = save_model(epoch, args, model, optimizer, tr_loss, type_name="")
-
 
     elif args.do_eval:
         if args.rank == 0:

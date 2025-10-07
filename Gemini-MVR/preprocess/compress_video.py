@@ -1,3 +1,7 @@
+"""
+Used to compress video in: https://github.com/ArrowLuo/CLIP4Clip
+Author: ArrowLuo
+"""
 import os
 import argparse
 import ffmpeg

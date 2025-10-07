@@ -497,3 +497,29 @@ class MSRVTT_TrainDataLoader(Dataset):
 
 
 
+# if __name__ == '__main__':
+    # process_motionx()
+    # exit()
+# class MSRVTT_DataLoader(Dataset):
+#     """MSRVTT dataset loader."""
+#     def __init__(
+#             self,
+#             csv_path,
+#             features_path,
+#             tokenizer,
+#             max_words=30,
+#             feature_framerate=1,
+#             max_frames=100,
+#             image_resolution=224,
+#             frame_order=0,
+#             slice_framepos=0,
+    # tokenizer = ClipTokenizer()
+    # train = '/mnt/workspace/haidong/explore/intervid/InternVideo/InternVideo1/Downstream/Video-Text-Retrieval/data/MSR-VTT/anns/MSRVTT_train.9k.csv'
+    # data_path = '/mnt/workspace/haidong/explore/intervid/InternVideo/InternVideo1/Downstream/Video-Text-Retrieval/data/MSR-VTT/anns/MSRVTT_data.json'
+    # val_path = "/mnt/workspace/haidong/explore/intervid/InternVideo/InternVideo1/Downstream/Video-Text-Retrieval/data/MSR-VTT/anns/MSRVTT_JSFUSION_test.csv"
+    # # load = MSRVTT_TrainDataLoader(train,data_path,,tokenizer,77,1,12,True,224,0,0)
+    # # myload = MSRVTT_DataLoader(val_path,'/mnt/workspace/haidong/explore/MSRVTT/videos/all',tokenizer,77,1,12,224,0,0)
+    # # pairs_text, pairs_mask, pairs_segment, video, video_mask = load[0]
+    # # myload = MOTIONX_DataLoader('/mnt/workspace/haidong/dataset/motion-x++-videos/val.json',tokenizer,77,1,12,224,0,0)
+    # myload = MOTIONX_TrainDataLoader('/mnt/workspace/haidong/dataset/motion-x++-videos/val_new.json',tokenizer,77,1,12,224,0,0)
+    # print(myload[1])
