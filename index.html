@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="description"
+          content="VimoRAG: Video-based Retrieval-augmented
+3D Motion Generation for Motion Language Models">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EmoAva</title> 
+
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-PYVRSFMDRL');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+          rel="stylesheet">
+    <link rel="stylesheet" href="./static/css/bulma.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+    <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="./static/css/index.css">
+
+    <link rel="stylesheet" href="./static/css/index-gradio.css">
+    <link rel="stylesheet" href="./static/css/live_theme.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="./static/js/fontawesome.all.min.js"></script>
+    <script src="./static/js/bulma-carousel.min.js"></script>
+    <script src="./static/js/bulma-slider.min.js"></script>
+    <!-- <script src="./static/js/index.js"></script> -->
+  <style>
+    .video-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 20px;
+      flex-wrap: nowrap;
+    }
+
+    .video-item {
+      text-align: center;
+      flex: 1;
+      max-width: 30%;
+      position: relative;
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .video-wrapper video {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .cover::after {
+      content: "▶";
+      position: absolute;
+      font-size: 16px;
+      color: white;
+      background: rgba(0,0,0,0.5);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      left: 10px;      
+      bottom: 10px;   
+      top: auto;       
+      right: auto;     
+    }
+
+    .video-item p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #333;
+    }
+  </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+
+<section class="hero">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered">
+                <div class="column has-text-centered">
+<h1 class="title is-2 publication-title"
+    style="display: flex; flex-direction: row; align-items: center; justify-content: center; margin-bottom: 5px;">
+<span style="
+  font-family: 'Dancing Script', cursive;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  background: linear-gradient(45deg, #8b410c, #d4a574, #f4c430);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+">
+  VimoRAG:
+</span>
+    <span>
+        Video-based
+    </span>
+</h1>
+                    <h1 class="title is-2 publication-title">Retrieval-augmented 3D Motion Generation for Motion Language Models</h1>
+                    <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="#">Haidong Xu</a>,</span>
+                        <span class="author-block">
+              <a href="#">Guangwei Xu</a>,</span>
+                        <span class="author-block">
+              <a href="https://www.zdzheng.xyz/">Zhedong Zheng</a>,</span>
+                        <span class="author-block">
+            </span>
+              <a href="https://x-up-lab.github.io/">Xiatian Zhu</a>,</span>
+                        <span class="author-block">
+
+                        <span class="author-block">
+              <a href="https://jiwei0523.github.io/">Wei Ji</a>,</span>
+                        <span class="author-block">
+              <a href="https://lxtgh.github.io/">Xiangtai Li</a>,</span>
+                        <span class="author-block">
+              <a href="#">Ruijie Guo</a>,</span>
+                        <span class="author-block">
+              <a href="https://zhangmeishan.github.io/">Meishan Zhang</a>,</span>
+                        <span class="author-block">
+              <a href="https://zhangmin-nlp-ai.github.io/">Min Zhang</a>,</span>
+                        <span class="author-block">
+              <a href="https://haofei.vip/">Hao Fei*</a>
+            </span>
+                    </div>
+
+                    <div class="is-size-5 publication-authors" style="margin-top: 10px;">
+                        <span class="author-block">Harbin Institute of Technology (Shenzhen)</a>, University of Macau, University of Surrey</span>
+                    </div>
+                    <div class="is-size-5 publication-authors" style="margin-top: 10px;">
+                        <span class="author-block">Nanjing University, Nanyang Technological University, National University of Singapore</span>
+                    </div>
+                    <div class="is-size-5 publication-authors">
+                        <span class="author-block" style="font-size: 15px;">NeurIPS 2025 (<sup>*</sup>Correspondence)</span>
+                    </div>
+
+
+                    <div class="column has-text-centered">
+                        <div class="publication-links">
+                            <!-- PDF Link. -->
+                            <span class="link-block">
+                <a href="https://arxiv.org/abs/2508.12081"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+
+                            <!-- <span class="link-block">
+                <a href="" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fa fa-laugh"></i>
+                  </span>
+                  <span>Demo</span>
+                </a>
+              </span> -->
+
+                            <!-- Code Link. -->
+                            <span class="link-block">
+                <a href="https://github.com/WalkerMitty/VimoRAG"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+
+
+                            <span class="link-block">
+                <a href="https://huggingface.co/datasets/Haidong2/VimoRAG" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fa fa-database"></i>
+                  </span>
+                  <span>Dataset</span>
+                  </a>
+              </span>
+
+                            <!-- Video Link. -->
+                            <!-- <span class="link-block">
+                <a href=""
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span> -->
+
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+<section class="section">
+    <div class="container is-max-desktop">
+        <!-- Abstract. -->
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-four-fifths">
+                <h3 class="title is-3">Abstract</h3>
+                <div class="content has-text-justified">
+                    <p>
+                      This paper introduces VimoRAG, a novel video-based retrieval-augmented motion
+                      generation framework for motion large language models (LLMs). As motion LLMs
+                      face severe out-of-domain/out-of-vocabulary issues due to limited annotated data,
+                      VimoRAG leverages large-scale in-the-wild video databases to enhance 3D motion
+                      generation by retrieving relevant 2D human motion signals. While video-based
+                      motion RAG is nontrivial, we address two key bottlenecks: (1) developing an
+                      effective motion-centered video retrieval model that distinguishes human poses
+                      and actions, and (2) mitigating the issue of error propagation caused by suboptimal
+                      retrieval results. We design the Gemini Motion Video Retriever mechanism and
+                      the Motion-centric Dual-alignment DPO Trainer, enabling effective retrieval and
+                      generation processes. Experimental results show that VimoRAG significantly boosts
+                      the performance of motion LLMs constrained to text-only input.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!--/ Abstract. -->
+
+        <br>
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="container is-max-desktop">
+
+        <div class="columns is-centered has-text-centered">
+            <h3 class="title is-3">OverView</h3>
+            <br>
+        </div>
+
+        <!-- Architecture -->
+        <div class="columns is-centered">
+            <div class="column is-full-width">
+
+                <div class="content has-text-justified">
+                    <img class="columns is-centered has-text-centered" src="./static/images/introduction4_01.png" alt="Teaser" width="100%"
+                         style="margin:0 auto">
+                    <br>
+                    <figcaption>
+                        <p style="text-align: center; color: #061E61;">
+                          VimoRAG first retrieves a relevant video from an unlabeled video database based on the input text. Both the text and retrieved video are then fed into a LLM to generate motion tokens, which are finally decoded into a motion sequence via VQ-VAE. To enhance this pipeline, we propose two key components: Gemini-MVR for effective cross-modal human video retrieval, and McDPO, a novel training strategy to mitigate error propagation in this process.
+                        </p>
+                    </figcaption>
+                    <br>
+                </div>
+                <br/>
+
+            </div>
+        </div>
+
+    
+
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="container is-max-desktop">
+
+        <div class="columns is-centered has-text-centered">
+            <h3 class="title is-3">Demonstrations</h3>
+            <br>
+        </div>
+  <div class="video-container">
+    
+    <div class="video-item">
+        <div class="video-wrapper">
+      <video controls muted autoplay loop>
+        <source src="https://github.com/user-attachments/assets/b1caaa46-a117-43d6-be04-0c8a52a1f536" type="video/mp4">
+      </video>
+        </div>
+      <p>Text: The person is bending over to put food on the floor for a pet, then straightening up and stepping back to standing position.</p>
+    </div>
+
+    <div class="video-item">
+        <div class="video-wrapper">
+      <video controls muted autoplay loop>
+        <source src="https://github.com/user-attachments/assets/61489f69-9257-4d5b-add7-b978e59b2e6a">
+      </video>
+        </div>
+      <p>Text: The person appears to be mimicking the action of riding a bicycle while standing up; alternating raising knees as if pedaling, and swinging arms as though holding handlebars.</p>
+    </div>
+
+    <div class="video-item">
+        <div class="video-wrapper">
+      <video controls muted autoplay loop>
+        <source src="https://github.com/user-attachments/assets/97c6054a-c69d-4184-8684-6fb16764fd01" type="video/mp4">
+      </video>
+        </div>
+      <p>Text: The person is standing upright with a rapid sequence of raising both fists from waist level to above the head and then lowering them back down in a cheering motion.</p>
+    </div>
+
+  </div>
+
+
+  <div class="video-container">
+    
+    <div class="video-item">
+        <div class="video-wrapper">
+      <video controls muted autoplay loop>
+        <source src="https://github.com/user-attachments/assets/a5bde1d0-378e-4059-9591-815adc709246" type="video/mp4">
+      </video>
+        </div>
+      <p>Text: The person is performing a punching motion while standing stationary. He is transitioning from a relaxed stance to a boxing stance, throwing a series of punches, and then returning to the relaxed stance.</p>
+    </div>
+
+    <div class="video-item">
+        <div class="video-wrapper">
+      <video controls muted autoplay loop>
+        <source src="https://github.com/user-attachments/assets/669ef0c5-4d7d-4206-b8b9-5bc63b97e53a">
+      </video>
+        </div>
+      <p>Text: The person is performing a stationary basketball shooting motion. Starting from a standing position, they bend their knees to generate power, raise the ball with both hands in front of them, extend their arms upwards while jumping slightly, and then follow through with one hand to release the ball, mimicking a basketball shot.</p>
+    </div>
+
+    <div class="video-item">
+        <div class="video-wrapper">
+      <video controls muted autoplay loop>
+        <source src="https://github.com/user-attachments/assets/36a6bfc0-58e9-4a7a-a9a1-5f6790dc1a06" type="video/mp4">
+      </video>
+        </div>
+      <p>Text: The person is walking back and forth in a room, turning slightly at each end, and appears to be fanning themselves continuously with one hand as they go.</p>
+    </div>
+
+  </div>
+
+
+
+  <div class="video-container">
+    
+    <div class="video-item">
+        <div class="video-wrapper">
+      <video controls muted autoplay loop>
+        <source src="https://github.com/user-attachments/assets/892ae8c3-f8c8-426e-a7a8-5d4f13fca883" type="video/mp4">
+      </video>
+        </div>
+      <p>Text: The person is squatting down and lifting a potted plant while then sitting on the floor with the plant.</p>
+    </div>
+
+    <div class="video-item">
+        <div class="video-wrapper">
+      <video controls muted autoplay loop>
+        <source src="https://github.com/user-attachments/assets/c148cc9d-4919-48c1-b7b9-3877a9ba2203">
+      </video>
+        </div>
+      <p>Text: The person is standing and making a phone call gesture. They lift their right hand to their ear as if holding a phone. Their body remains relatively static while performing the gesture.</p>
+    </div>
+
+    <div class="video-item">
+        <div class="video-wrapper">
+      <video controls muted autoplay loop>
+        <source src="https://github.com/user-attachments/assets/d3002052-59e6-4a1a-a7f0-b8ee280bba1a" type="video/mp4">
+      </video>
+        </div>
+      <p>Text: The person is preparing to throw a frisbee. Starting with a stance where the weight is on the back foot, they shift the weight forward, bringing the arm with the frisbee back for momentum. Then, they step forward with the opposite leg, rotating the torso and extending the arm to release the frisbee.</p>
+    </div>
+
+  </div>
+
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="container is-max-desktop">
+
+        <div class="columns is-centered has-text-centered">
+            <h3 class="title is-3">Visualization Results in Cross-domain Settings</h3>
+            <br>
+        </div>
+
+        <!-- Architecture -->
+        <div class="columns is-centered">
+            <div class="column is-full-width">
+
+                <div class="content has-text-justified">
+                    <img class="columns is-centered has-text-centered" src="./static/images/appendix-3-3.png" alt="Teaser" width="90%"
+                         style="margin:0 auto">
+                    <br>
+                    <br>
+                </div>
+                <br/>
+
+            </div>
+        </div>
+
+    
+
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="container is-max-desktop">
+
+        <div class="columns is-centered has-text-centered">
+            <h3 class="title is-3">Gemini-MVR Retrieval Model</h3>
+            <br>
+        </div>
+
+        <!-- Architecture -->
+        <div class="columns is-centered">
+            <div class="column is-full-width">
+
+                <div class="content has-text-justified">
+                    <img class="columns is-centered has-text-centered" src="./static/images/method1-v3_01.png" alt="Teaser" width="50%"
+                         style="margin:0 auto">
+                    <br>
+                    <figcaption>
+                        <p style="text-align: center; color: #061E61;">
+                          The Gemini-MVR retrieval model consists of two independent retrievers—object-level and actionlevel—whose outputs are fused by a lightweight
+                          router to produce the final similarity score.
+                          Each retriever encodes both text and video
+                          with a specific focus. The object-level retriever
+                          captures visual entities (objects) and their
+                          textual arguments, while the action-level
+                          retriever targets motion and predicate-level
+                          semantics.
+                        </p>
+                    </figcaption>
+                    <br>
+                </div>
+                <br/>
+
+            </div>
+        </div>
+
+    
+
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="container is-max-desktop">
+
+        <div class="columns is-centered has-text-centered">
+            <h3 class="title is-3">McDPO Training Strategy</h3>
+            <br>
+        </div>
+
+        <!-- Architecture -->
+        <div class="columns is-centered">
+            <div class="column is-full-width">
+
+                <div class="content has-text-justified">
+                    <img class="columns is-centered has-text-centered" src="./static/images/mcdpo.png" alt="Teaser" width="100%"
+                         style="margin:0 auto">
+                    <br>
+                    <figcaption>
+                        <p style="text-align: center; color: #061E61;">
+                            Given a text t and a retrieved video v, we first perform visual
+                            demonstration-enhanced instruction tuning to establish a base reference model π_ref. Using π_ref and
+                            the proposed motion-centric dual-alignment reward model, we construct a preference training set,
+                            and then apply DPO training on this dataset.
+
+                        </p>
+                    </figcaption>
+                    <br>
+                </div>
+                <br/>
+
+            </div>
+        </div>
+
+    
+
+    </div>
+</section>
+<!-- <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+        <h2 class="title">BibTeX</h2>
+        <pre><code>
+</code></pre>
+    </div>
+</section> -->
+
+
+<footer class="footer">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-8">
+                <div class="content">
+                    <p style="text-align: center;">
+                        The webpage is built based on <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
