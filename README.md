@@ -12,6 +12,7 @@
 - [📰 News](#-news)
 - [📂 README Overview](#-readme-overview)
 - [🎮 Demo (DIY)](#-demo-diy)
+  - [Resources](#resources)
   - [Retrieval](#retrieval)
   - [Generation](#generation)
 - [📊 Evaluation](#-evaluation)
@@ -21,7 +22,13 @@
 - [Acknowledgements](#acknowledgements)
 
 ## 🎮 Demo (DIY)
-Just input a sentence, then we will retrieve a video, and then feed them to LLM to generate 3D human motion.
+After you input a sentence, the system automatically retrieves a matching video and uses an LLM to produce high-quality 3D human motion.
+
+
+### Resources
+
+For detailed instructions, please refer to the [Dataset README](./readme_dataset.md).
+
 
 ### Retrieval
 
