@@ -28,9 +28,10 @@ mv vimorag_models/resources ./
 
 ## Stage 3 (Optional)
 - We have already prepared a small subset of the video database in `vimorag_models/resources/motion-x++-videos/haa500`. This subset is sufficient for running the demo. 
-- However, if you intend to train your own model, you will need the full retrieval database. Due to copyright restrictions, we cannot distribute the complete dataset directly. Instead, we provide download links to the original open-source datasets below. The final directory structure should look like this:
-- Want to download all the videos in one click? Please send us copies of the license agreements you’ve obtained for all the datasets, and we’ll provide you with a download link.
+- However, if you intend to train your own model, you will need the full retrieval database. We provide download links to the original open-source datasets below. 
+- Want to download all the videos in one click? Please send me (182haidong ``at`` gmail.com) copies of the license agreements you’ve obtained for all the datasets, and we’ll provide you with a download link.
 
+- The final directory structure should look like this:
 ```
 └── resources
     ├── motion-x++-videos
@@ -56,7 +57,7 @@ mv vimorag_models/resources ./
         ├── penn_action
         │   └── mp4_version
         └── ucf-101
-            └── mp4_version~
+            └── mp4_version
 ```
 
 Here are the links:
