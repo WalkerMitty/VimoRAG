@@ -95,7 +95,7 @@ Motion-centric Dual-alignment DPO
 
 Sample the SFT model three times to obtain candidate data.
 
-Note: This step is time-consuming, so we've prepared the data for you in advance.
+Note: This step is time-consuming, so we've prepared the data for you in advance. (Check the [Dataset README](./readme_dataset.md))
 ```shell
 python llm_inference.py --retrieval_result ../resources/retrieval_inference_wild/train_t2m_top1_wild_new.json --seed 2024 --llm_seed 2024 --out_dir ../resources/llm_generated_text/no_motion_r128_a256_bsz8x8_epoch2_new_llmseed2024_train --temperature 0.9 --split train --lora --model_path ../output/sft_model --model_base ../resources/playground/Phi-3-mini-4k-instruct
 ```
