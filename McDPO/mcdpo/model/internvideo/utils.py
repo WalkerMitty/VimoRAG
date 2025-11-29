@@ -221,6 +221,7 @@ class InternVideo2_Stage2V(nn.Module):
             image, None, use_image, x_vis_return_idx=-2, x_vis_only=True
         )
         # torch.Size([4, 1025, 1408])
+        # import pdb;pdb.set_trace()
         return vision_embeds
 
     def build_vision_encoder(self):

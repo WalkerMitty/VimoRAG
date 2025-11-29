@@ -164,7 +164,8 @@ class VideoGPTPlusMetaForCausalLM(ABC):
 
     def encode_videos(self, frames, context_images, batch_size):
         frames = rearrange(frames, '(b t) c h w -> b t c h w', b=batch_size)
-        num_chunks = frames.shape[1] // CHUNK_SIZE
+        num_chunks = frames.shape[1] // CHUNK_SIZE # 4
+        # import pdb;pdb.set_trace()
         if 'InternVideo2' in self.config.mm_vision_tower:
             L = 256  # Number of features per frame from InternVideo2-Stage2_1B-224p-f4
             D = 1408  # Feature dimension of InternVideo2-Stage2_1B-224p-f4

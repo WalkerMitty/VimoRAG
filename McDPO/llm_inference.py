@@ -42,7 +42,7 @@ def main() -> None:
     if not args.demo_inference:
         from utils.word_vectorizer import WordVectorizer
         w_vectorizer = WordVectorizer('./glove', 'our_vab')
-        val_loader = DATALoader(args.dataname, args.split, 32, w_vectorizer, unit_length=2**args.down_t,seed=args.seed) #这里必须是32, 可以先用val 做快速验证，最后再跑test
+        val_loader = DATALoader(args.dataname, args.split, 32, w_vectorizer, unit_length=2**args.down_t,seed=args.seed)
         if args.dataname == 'kit' : 
             dataset_opt_path = './checkpoints/kit/Comp_v6_KLD005/opt.txt'  
             args.nb_joints = 21

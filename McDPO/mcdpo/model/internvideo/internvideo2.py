@@ -164,9 +164,11 @@ class LayerScale(nn.Module):
 
 
 class Attention(nn.Module):
+    # attn_records = {} 
     def __init__(self, dim, num_heads=8, qkv_bias=False, attn_drop=0., proj_drop=0., use_flash_attn=False,
                  causal=False, norm_layer=nn.LayerNorm, qk_normalization=False, use_fused_rmsnorm=False):
         super().__init__()
+      
         assert dim % num_heads == 0, 'dim should be divisible by num_heads'
         self.num_heads = num_heads
         head_dim = dim // num_heads
@@ -201,6 +203,10 @@ class Attention(nn.Module):
         attn = ((q * self.scale) @ k.transpose(-2, -1))
         # attn = attn - attn.max(-1)[0].unsqueeze(-1)  # in case of overflow for fp16
         attn = attn.softmax(dim=-1)
+        # import pdb; pdb.set_trace()
+        # layer_id = getattr(self, "layer_id", None)
+        # if layer_id is not None:
+        #     Attention.attn_records[layer_id] = attn.mean(1).detach().cpu()
         attn = self.attn_drop(attn)
         # print(torch.cuda.memory_allocated(), torch.cuda.memory_allocated())
         x = (attn @ v).transpose(1, 2).reshape(B, N, C)
@@ -488,6 +494,8 @@ class PretrainInternVideo2(nn.Module):
                   layerscale_no_force_fp32=layerscale_no_force_fp32,
                   use_fused_rmsnorm=use_fused_rmsnorm)
             for i in range(depth)])
+        for idx, blk in enumerate(self.blocks):
+            blk.attn.layer_id = idx
         self.clip_projector = AttentionPoolingBlock(
             dim=embed_dim, num_heads=attn_pool_num_heads, qkv_bias=True, qk_scale=None,
             drop=0., attn_drop=0., norm_layer=partial(nn.LayerNorm, eps=1e-5), out_dim=clip_embed_dim)
@@ -645,7 +653,8 @@ class PretrainInternVideo2(nn.Module):
             x, residual = x
             if residual is not None:
                 x = x + residual
-
+        # import pdb;pdb.set_trace()
+        # torch.save(Attention.attn_records, "all_attn.pth")
         x_vis = x
         if x_vis_only:
             return x_vis

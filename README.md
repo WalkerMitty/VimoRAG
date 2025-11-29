@@ -11,7 +11,8 @@
 - [VimoRAG: Video-based Retrieval-augmented 3D Motion Generation for Motion Language Models](#vimorag-video-based-retrieval-augmented-3d-motion-generation-for-motion-language-models)
 - [📰 News](#-news)
 - [📂 README Overview](#-readme-overview)
-- [🎮 Demo (DIY)](#-demo-diy)
+- [🎮 Demo](#-demo)
+- [🛠️ Full Pipeline](#-full-pipeline)
   - [Resources](#resources)
   - [Retrieval](#retrieval)
   - [Generation](#generation)
@@ -21,7 +22,33 @@
   - [stage 2](#stage-2)
 - [Acknowledgements](#acknowledgements)
 
-## 🎮 Demo (DIY)
+## 🎮 Demo
+
+- Step1: Resources
+
+Download the resources from [Dataset README](./readme_dataset.md).
+- Step2: Environment
+
+```shell
+cd McDPO
+conda env create -f environment.yml
+conda activate mcdpo
+bash additional_env.sh
+
+```
+- Step3: Run
+```shell
+# merge lora for sft model
+python llm_inference.py --merge_lora --model_base ../resources/playground/Phi-3-mini-4k-instruct --model_path ../output/sft_model --out_dir ../output/sft_model/merged_lora
+
+# inference
+python llm_inference.py --retrieval_result ../Gemini-MVR/diy_output/retrieval_result.json --out_dir ../output --temperature 0.85 --lora --model_path ../output/dpo_model --llm_seed 2024 --model_base ../output/sft_model/merged_lora --demo_inference
+
+## For visualization
+python generate_motion.py --generated_file ../output/start-1.json --out_dir ../output/visual_output --render
+```
+
+## 🛠️ Full Pipeline
 After you input a sentence, the system automatically retrieves a matching video and uses an LLM to produce high-quality 3D human motion.
 
 

@@ -500,6 +500,7 @@ def llm_inference_demo(params: EvaluationParams):
                     top_k=200,
                     use_cache=True,
                 )
+
         input_token_len = input_ids.shape[1]
         outputs = tokenizer.batch_decode(output_ids[:, input_token_len:], skip_special_tokens=True)[0]
         # t = time.perf_counter() - t0
