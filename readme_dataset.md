@@ -1,15 +1,16 @@
 # Dataset and Models
 
 ## Stage 1 (Our models)
-- Download the dataset and models from [HuggingFace](https://huggingface.co/datasets/Haidong2/VimoRAG) (or [ModelScope](https://modelscope.cn/models/Walkerhai/VimoRAG))
+- Download the dataset and models from [HuggingFace](https://huggingface.co/datasets/Haidong2/VimoRAG) (or [ModelScope](https://modelscope.cn/models/Walkerhai/VimoRAG)) and put them in ``data/``
 - Run
 
 ```shell
-cd ./VimoRAG
-unzip vimorag_models.zip
-mv vimorag_models/McDPO/checkpoints ./McDPO/
-mv vimorag_models/output ./
-mv vimorag_models/resources ./
+cd data/VimoRAG
+unzip McDPO.zip
+unzip resources.zip
+mv McDPO/checkpoints code/VimoRAG/McDPO/
+mv output code/VimoRAG/
+mv resources code/VimoRAG
 ```
 
 ## Stage 2 (Pretrained models)
