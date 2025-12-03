@@ -12,7 +12,7 @@
 - [📰 News](#-news)
 - [📂 README Overview](#-readme-overview)
 - [🎮 Demo](#-demo)
-- [🛠️ Full Pipeline](#-full-pipeline)
+- [🛠️ Full Pipeline](#️-full-pipeline)
   - [Resources](#resources)
   - [Retrieval](#retrieval)
   - [Generation](#generation)
@@ -66,6 +66,17 @@ conda env create -f environment.yml
 conda activate gemini-mvr
 
 pip install torch==1.8.1+cu111 torchvision==0.9.1+cu111 torchaudio==0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
+```
+
+- Downloading Pretrained Models
+
+> download [ViT-L-14](https://openaipublic.azureedge.net/clip/models/b8cca3fd41ae0c99ba7e8951adf17d267cdb84cd88be6f7c2e0eca1737a03836/ViT-L-14.pt) 
+
+> download InternVideo-MM-L-14.ckpt from [Here](https://huggingface.co/OpenGVLab/InternVideo1.0/tree/main)
+
+```shell
+mv ViT-L-14.pt VimoRAG/resources/
+mv InternVideo-MM-L-14.ckpt VimoRAG/resources/
 ```
 - Run
 ```shell

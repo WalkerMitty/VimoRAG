@@ -517,7 +517,7 @@ def eval_epoch(args, model, test_dataloader, device, n_gpu,logger=None,object_mo
                 batch_list_v_obj = torch.load(args.saved_video_embed.replace('.pth','obj_mask.pth'))
                 batch_list_v_act = torch.load(args.saved_video_embed.replace('.pth','act_mask.pth'))
         
-                batch_visual_output_list_obj = [tensor.to(device) for tensor in batch_visual_output_list_obj] #2825全量list大小
+                batch_visual_output_list_obj = [tensor.to(device) for tensor in batch_visual_output_list_obj]
                 batch_visual_output_list_act = [tensor.to(device) for tensor in batch_visual_output_list_act]
                 batch_list_v_obj = [(tup[0].to(device),) for tup in batch_list_v_obj]
                 batch_list_v_act = [(tup[0].to(device),) for tup in batch_list_v_act]
@@ -525,7 +525,7 @@ def eval_epoch(args, model, test_dataloader, device, n_gpu,logger=None,object_mo
                 batch_visual_output_list_obj = torch.load(args.saved_video_embed.replace('.pth','obj.pth'))
                 batch_list_v_obj = torch.load(args.saved_video_embed.replace('.pth','obj_mask.pth'))
         
-                batch_visual_output_list_obj = [tensor.to(device) for tensor in batch_visual_output_list_obj] #2825全量list大小
+                batch_visual_output_list_obj = [tensor.to(device) for tensor in batch_visual_output_list_obj]
       
                 batch_list_v_obj = [(tup[0].to(device),) for tup in batch_list_v_obj]
     
@@ -570,7 +570,7 @@ def eval_epoch(args, model, test_dataloader, device, n_gpu,logger=None,object_mo
         final_dict = {}
         for index,text in enumerate(tqdm(all_text)):
             final_dict[text] = all_video_paths[top_k_indices[index]]
-        
+        # import pdb;pdb.set_trace()
         with open(args.inference_result,'w') as f:
             json.dump(final_dict,f)
 

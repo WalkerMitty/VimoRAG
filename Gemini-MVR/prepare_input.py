@@ -7,7 +7,7 @@ def get_wild()->list:
     video_data_base = '../resources/motionbertprocessed.pth'
     raw_data = torch.load(video_data_base)
     all_videos_path = list(raw_data.keys())
-
+    all_videos_path = [item for item in all_videos_path if "haa500" in item]
     return all_videos_path
 def construct_wild(args):
     if not os.path.exists("../output"):

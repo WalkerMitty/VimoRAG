@@ -361,7 +361,7 @@ class VideoGPTPlusMetaForCausalLM(ABC):
                             cur_new_labels.append(cur_labels[image_token_end:image_token_end + 1])
                             cur_labels = cur_labels[image_token_end + 2:]
                     else:
-                        cur_new_input_embeds.append(self.get_model().embed_tokens(cur_input_ids[:image_token_start])) #pretrain走这边
+                        cur_new_input_embeds.append(self.get_model().embed_tokens(cur_input_ids[:image_token_start]))
                         cur_new_input_embeds.append(cur_image_features)
                         if labels is not None:
                             cur_new_labels.append(cur_labels[:image_token_start])

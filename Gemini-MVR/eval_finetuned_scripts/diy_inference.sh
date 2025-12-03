@@ -10,7 +10,7 @@ python -u -m retrieval_from_wild \
     --lr=1e-4 \
     --max_words=77 \
     --max_frames=16 \
-    --batch_size_val=2 \
+    --batch_size_val=8 \
     --datatype="motionx" \
     --feature_framerate=1 \
     --slice_framepos=2 \
